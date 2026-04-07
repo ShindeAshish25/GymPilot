@@ -1,0 +1,15 @@
+{
+  "name": "gym-saas-root",
+  "version": "1.0.0",
+  "description": "Root management for Gym SaaS Project",
+  "scripts": {
+    "install:all": "npm install --prefix backend && cd frontend && flutter pub get",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "cd frontend && flutter run",
+    "dev": "concurrently \"npm run dev --prefix backend\" \"cd frontend && flutter run\"",
+    "build:all": "npm run build --prefix backend && cd frontend && flutter build apk"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
