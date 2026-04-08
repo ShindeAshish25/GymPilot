@@ -16,7 +16,7 @@ class DashboardShell extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppHeader(notificationCount: 3),
+      appBar: AppHeader(title: _getTitle(currentIndex)),
       body: child
           .animate(key: ValueKey(currentIndex))
           .fadeIn(duration: 300.ms)
@@ -55,6 +55,23 @@ class DashboardShell extends StatelessWidget {
       case 4:
         context.go('/reports');
         break;
+    }
+  }
+
+  String _getTitle(int index) {
+    switch (index) {
+      case 0:
+        return ""; // Shows Gym Name
+      case 1:
+        return "Members";
+      case 2:
+        return "Trainers";
+      case 3:
+        return "Expenses";
+      case 4:
+        return "Gym Reports";
+      default:
+        return "";
     }
   }
 }

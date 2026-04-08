@@ -102,7 +102,7 @@ class MemberPremiumPopup extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF4D67),
                   foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 60),
+                  minimumSize: const Size.fromHeight(60),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   elevation: 8,
                   shadowColor: const Color(0xFFFF4D67).withOpacity(0.4),

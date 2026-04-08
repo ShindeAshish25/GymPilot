@@ -6,7 +6,9 @@ const {
   addCategory,
   addExpense,
   getExpenses,
-  getExpenseAnalysis
+  getExpenseAnalysis,
+  updateExpense,
+  deleteExpense
 } = require('../controllers/expenseController');
 
 // Categories
@@ -17,5 +19,7 @@ router.post('/categories', auth, addCategory);
 router.get('/', auth, getExpenses);
 router.post('/', auth, addExpense);
 router.get('/analysis', auth, getExpenseAnalysis);
+router.put('/:id', auth, updateExpense);
+router.delete('/:id', auth, deleteExpense);
 
 module.exports = router;

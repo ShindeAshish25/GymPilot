@@ -1,32 +1,32 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import '../services/api_service.dart';
 import '../../core/utils/exceptions.dart';
 
 class AuthRepository {
   final ApiService _apiService = ApiService();
 
-  Future<String> login(String email, String password) async {
+  Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await _apiService.post('/auth/login', {
       'email': email,
       'password': password,
     });
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return data['token'];
+      debugPrint('AuthRepository: Login Body: ${response.body}');
+      return json.decode(response.body);
     } else {
       final error = json.decode(response.body);
       throw ServerException(error['msg'] ?? 'Failed to login');
     }
   }
 
-  Future<String> registerGym(Map<String, String> fields, Uint8List bytes, String fileName) async {
+  Future<Map<String, dynamic>> registerGym(Map<String, String> fields, Uint8List bytes, String fileName) async {
     final response = await _apiService.postMultipart('/auth/register-gym', fields, bytes, fileName, 'gymLogo');
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return data['token'];
+      return json.decode(response.body);
     } else {
       final error = json.decode(response.body);
       throw ServerException(error['msg'] ?? 'Failed to register gym');

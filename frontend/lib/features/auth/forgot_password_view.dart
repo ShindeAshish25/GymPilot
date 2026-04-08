@@ -235,22 +235,39 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               height: 60,
               textStyle: const TextStyle(fontSize: 24, color: AppColors.textPrimary, fontWeight: FontWeight.bold),
               decoration: BoxDecoration(
-                border: Border.all(color: AppColors.surfaceLight, width: 2),
-                borderRadius: BorderRadius.circular(16),
-                color: AppColors.surfaceLight.withValues(alpha: 0.2),
+                border: Border.all(color: AppColors.textMuted.withValues(alpha: 0.5), width: 1),
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
             ),
             focusedPinTheme: PinTheme(
               width: 50,
               height: 60,
-              textStyle: const TextStyle(fontSize: 24, color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+              textStyle: const TextStyle(fontSize: 24, color: AppColors.primary, fontWeight: FontWeight.bold),
               decoration: BoxDecoration(
                 border: Border.all(color: AppColors.primary, width: 2),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(color: AppColors.primary.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 5)),
                 ],
+              ),
+            ),
+            submittedPinTheme: PinTheme(
+              width: 50,
+              height: 60,
+              textStyle: const TextStyle(fontSize: 24, color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.success, width: 1.5),
+                borderRadius: BorderRadius.circular(12),
+                color: AppColors.success.withValues(alpha: 0.05),
               ),
             ),
           ).animate().scale(delay: 400.ms),

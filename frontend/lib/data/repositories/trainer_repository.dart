@@ -6,7 +6,7 @@ class TrainerRepository {
   final ApiService _apiService = ApiService();
 
   Future<List<TrainerModel>> getTrainers() async {
-    final response = await _apiService.get('/gym/trainers'); // Adjusted to match backend routes if needed or gymRoutes
+    final response = await _apiService.get('/trainers'); 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       return data.map((json) => TrainerModel.fromJson(json)).toList();
@@ -16,7 +16,7 @@ class TrainerRepository {
   }
 
   Future<TrainerModel> addTrainer(Map<String, dynamic> trainerData) async {
-    final response = await _apiService.post('/gym/trainers', trainerData);
+    final response = await _apiService.post('/trainers', trainerData);
     if (response.statusCode == 200) {
       return TrainerModel.fromJson(json.decode(response.body));
     } else {
@@ -25,14 +25,14 @@ class TrainerRepository {
   }
 
   Future<void> deleteTrainer(String id) async {
-    final response = await _apiService.delete('/gym/trainers/$id');
+    final response = await _apiService.delete('/trainers/$id');
     if (response.statusCode != 200) {
       throw Exception('Failed to delete trainer');
     }
   }
 
   Future<TrainerModel> updateTrainer(String id, Map<String, dynamic> trainerData) async {
-    final response = await _apiService.put('/gym/trainers/$id', trainerData);
+    final response = await _apiService.put('/trainers/$id', trainerData);
     if (response.statusCode == 200) {
       return TrainerModel.fromJson(json.decode(response.body));
     } else {

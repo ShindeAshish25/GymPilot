@@ -9,6 +9,8 @@ import 'package:intl/intl.dart';
 import 'package:frontend/data/models/member_model.dart';
 import 'package:frontend/providers/member_provider.dart';
 import 'package:frontend/core/constants/app_colors.dart';
+import 'package:frontend/providers/trainer_provider.dart';
+import 'package:frontend/data/models/trainer_model.dart';
 
 class MemberFormScreen extends StatefulWidget {
   final MemberModel? member;
@@ -36,6 +38,10 @@ class _MemberFormScreenState extends State<MemberFormScreen>
   String? _batch;
   int _duration = 1;
   String? _training;
+  bool _wantPersonalTraining = false;
+  int? _ptDuration;
+  String? _trainerId;
+  String? _trainerName;
   final _totalCtrl = TextEditingController();
   final _paidCtrl = TextEditingController();
   double _remaining = 0;
@@ -63,6 +69,9 @@ class _MemberFormScreenState extends State<MemberFormScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<TrainerProvider>(context, listen: false).fetchTrainers();
+    });
     if (widget.member != null) _load();
     _totalCtrl.addListener(_calc);
     _paidCtrl.addListener(_calc);
@@ -79,6 +88,9 @@ class _MemberFormScreenState extends State<MemberFormScreen>
     _payDate = m.paymentDate ?? DateTime.now();
     _batch = m.batch;
     _training = m.trainingType;
+    _wantPersonalTraining = m.wantPersonalTraining;
+    _ptDuration = m.personalTrainingDuration;
+    _trainerId = m.trainerId;
     _duration = m.membershipDuration ?? 1;
     _totalCtrl.text = (m.totalFee > 0) ? m.totalFee.toStringAsFixed(0) : '';
     _paidCtrl.text = (m.amountPaid > 0) ? m.amountPaid.toStringAsFixed(0) : '';
@@ -144,6 +156,9 @@ class _MemberFormScreenState extends State<MemberFormScreen>
       'batch': _batch,
       'membershipDuration': _duration,
       'trainingType': _training,
+      'wantPersonalTraining': _wantPersonalTraining,
+      'personalTrainingDuration': _ptDuration,
+      'trainerId': _trainerId,
       'totalFee': double.tryParse(_totalCtrl.text) ?? 0,
       'amountPaid': double.tryParse(_paidCtrl.text) ?? 0,
       'remainingAmount': _remaining,
@@ -474,6 +489,85 @@ class _MemberFormScreenState extends State<MemberFormScreen>
         _ddStr('Training Type', _training, _trainingOpts,
             (v) => setState(() => _training = v),
             icon: Icons.fitness_center_outlined),
+        const SizedBox(height: 14),
+
+        // Personal Training option
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Want Personal Training?',
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary)),
+                const SizedBox(height: 2),
+                Text('Get a dedicated physical trainer',
+                    style: TextStyle(
+                        fontSize: 11, color: AppColors.textMuted)),
+              ],
+            ),
+            Switch(
+              value: _wantPersonalTraining,
+              activeColor: AppColors.primary,
+              onChanged: (val) {
+                setState(() {
+                  _wantPersonalTraining = val;
+                  if (!val) {
+                    _trainerId = null;
+                    _trainerName = null;
+                    _ptDuration = null;
+                  } else {
+                    _ptDuration = _duration; // default to membership duration
+                  }
+                });
+              },
+            ),
+          ],
+        ),
+        if (_wantPersonalTraining) ...[
+          const SizedBox(height: 14),
+          _lbl('Select Trainer'),
+          const SizedBox(height: 6),
+          GestureDetector(
+            onTap: _showTrainerPopup,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.person_outline, size: 18, color: AppColors.textMuted),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _trainerName ?? 'Choose a Trainer',
+                      style: TextStyle(
+                        color: _trainerName != null ? AppColors.textPrimary : AppColors.textMuted,
+                        fontSize: 14,
+                        fontWeight: _trainerName != null ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.search, size: 18, color: AppColors.textMuted),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          _ddInt(
+            _ptDuration ?? 1,
+            [1, 2, 3, 6, 12],
+            (val) => setState(() => _ptDuration = val),
+            itemLabel: (m) => '$m Month${m > 1 ? 's' : ''}',
+            icon: Icons.timer_outlined,
+          ),
+        ],
         const SizedBox(height: 14),
 
         // ✅ FIX: Payment amount fields with full visible borders & proper input
@@ -989,6 +1083,100 @@ class _MemberFormScreenState extends State<MemberFormScreen>
           child: child!,
         ),
       );
+
+  void _showTrainerPopup() {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            constraints: const BoxConstraints(maxHeight: 500),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Select Trainer', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                  ],
+                ),
+                const Divider(),
+                Expanded(
+                  child: Consumer<TrainerProvider>(
+                    builder: (context, provider, _) {
+                      if (provider.isLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (provider.trainers.isEmpty) {
+                        return const Center(child: Text('No trainers available'));
+                      }
+                      return ListView.builder(
+                        itemCount: provider.trainers.length,
+                        itemBuilder: (context, index) {
+                          final trainer = provider.trainers[index];
+                          return Card(
+                            elevation: 0,
+                            color: Colors.grey.shade50,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(color: Colors.grey.shade200),
+                            ),
+                            margin: const EdgeInsets.only(bottom: 8),
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: AppColors.primary.withOpacity(0.1),
+                                backgroundImage: trainer.photoUrl != null ? NetworkImage(trainer.photoUrl!) : null,
+                                child: trainer.photoUrl == null
+                                    ? const Icon(Icons.person, color: AppColors.primary)
+                                    : null,
+                              ),
+                              title: Text(trainer.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (trainer.specialization != null)
+                                    Text(trainer.specialization!, style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                                  const SizedBox(height: 4),
+                                  Text('Fee: ₹${trainer.feeChargePerPerson} / month',
+                                      style: TextStyle(fontSize: 12, color: Colors.green.shade700, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                              isThreeLine: true,
+                              trailing: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  minimumSize: const Size(0, 36),
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _trainerId = trainer.id;
+                                    _trainerName = trainer.name;
+                                  });
+                                  Navigator.pop(ctx);
+                                },
+                                child: const Text('Select'),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   void dispose() {

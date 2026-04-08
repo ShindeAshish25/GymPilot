@@ -34,6 +34,22 @@ class ExpenseRepository {
     }
   }
 
+  Future<ExpenseModel> updateExpense(String id, Map<String, dynamic> data) async {
+    final response = await _apiService.put('/expenses/$id', data);
+    if (response.statusCode == 200) {
+      return ExpenseModel.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to update expense');
+    }
+  }
+
+  Future<void> deleteExpense(String id) async {
+    final response = await _apiService.delete('/expenses/$id');
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete expense');
+    }
+  }
+
   Future<ExpenseCategoryModel> addCategory(Map<String, dynamic> data) async {
     final response = await _apiService.post('/expenses/categories', data);
     if (response.statusCode == 200) {

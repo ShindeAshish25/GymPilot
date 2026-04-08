@@ -1,3 +1,6 @@
+
+
+
 // const bcrypt = require('bcryptjs');
 // const jwt = require('jsonwebtoken');
 // const Gym = require('../models/gymModel');
@@ -7,74 +10,73 @@
 // const { sendOtpEmail } = require('../services/emailService');
 
 // exports.registerGym = async (req, res) => {
-//     const { gymName, fullName, email, mobileNumber, password, address, subscriptionMonths, isFreeTrial } = req.body;
-  
-//     try {
-//       let gym = await Gym.findOne({ email });
-//       if (gym) {
-//         return res.status(400).json({ msg: 'Gym already exists' });
-//       }
-  
-//       // Generate Unique Gym ID (e.g., GYM-101)
-//       const count = await Gym.countDocuments();
-//       const gymId = `GYM-${100 + count + 1}`;
-  
-//       // Check if email is verified
-//       const otpData = await OTP.findOne({ email, verified: true });
-//       if (!otpData) {
-//         return res.status(400).json({ msg: 'Please verify your email via OTP first' });
-//       }
-  
-//       const salt = await bcrypt.genSalt(10);
-//       const passwordHash = await bcrypt.hash(password, salt);
-  
-//       // Calculate plan end date
-//       const planEndDate = new Date();
-//       let months = parseInt(subscriptionMonths) || 1;
-      
-//       if (isFreeTrial) {
-//         planEndDate.setDate(planEndDate.getDate() + 30);
-//         months = 1; // Free trial is for 1 month
-//       } else {
-//         planEndDate.setMonth(planEndDate.getMonth() + months);
-//       }
-  
-//       // Get logo URL if file was uploaded
-//       const logoUrl = req.file ? `/uploads/logos/${req.file.filename}` : '';
-  
-//       gym = new Gym({
-//         gymId,
-//         gymName,
-//         fullName,
-//         email,
-//         mobileNumber,
-//         passwordHash,
-//         address,
-//         subscriptionMonths: months,
-//         isFreeTrial: isFreeTrial || false,
-//         planEndDate,
-//         logoUrl,
-//       });
+//   const { gymName, fullName, email, mobileNumber, password, address, subscriptionMonths, isFreeTrial } = req.body;
+
+//   try {
+//     let gym = await Gym.findOne({ email });
+//     if (gym) {
+//       return res.status(400).json({ msg: 'Gym already exists' });
+//     }
+
+//     const count = await Gym.countDocuments();
+//     const gymId = `GYM-${100 + count + 1}`;
+
+//     const otpData = await OTP.findOne({ email, verified: true });
+//     if (!otpData) {
+//       return res.status(400).json({ msg: 'Please verify your email via OTP first' });
+//     }
+
+//     const salt = await bcrypt.genSalt(10);
+//     const passwordHash = await bcrypt.hash(password, salt);
+
+//     const planEndDate = new Date();
+//     let months = parseInt(subscriptionMonths) || 1;
+
+//     if (isFreeTrial) {
+//       planEndDate.setDate(planEndDate.getDate() + 30);
+//       months = 1;
+//     } else {
+//       planEndDate.setMonth(planEndDate.getMonth() + months);
+//     }
+
+//     const logoUrl = req.file ? `/uploads/logos/${req.file.filename}` : '';
+
+//     gym = new Gym({
+//       gymId,
+//       gymName,
+//       fullName,
+//       email,
+//       mobileNumber,
+//       passwordHash,
+//       address,
+//       subscriptionMonths: months,
+//       isFreeTrial: isFreeTrial || false,
+//       planEndDate,
+//       logoUrl,
+//     });
 
 //     await gym.save();
-
-//     // Clean up verified OTP
 //     await OTP.deleteOne({ email });
+
+//     if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET not set');
 
 //     const payload = { gym: { id: gym.id } };
 //     jwt.sign(
 //       payload,
-//       process.env.JWT_SECRET || 'secret123',
+//       process.env.JWT_SECRET,
 //       { expiresIn: '5 days' },
 //       (err, token) => {
 //         if (err) throw err;
-//         res.json({ token, gym: {
-//           id: gym.id,
-//           gymName: gym.gymName,
-//           fullName: gym.fullName,
-//           email: gym.email,
-//           logoUrl: gym.logoUrl
-//         } });
+//         res.json({
+//           token,
+//           gym: {
+//             id: gym.id,
+//             gymName: gym.gymName,
+//             fullName: gym.fullName,
+//             email: gym.email,
+//             logoUrl: gym.logoUrl,
+//           },
+//         });
 //       }
 //     );
 //   } catch (err) {
@@ -92,10 +94,12 @@
 //     const isMatch = await bcrypt.compare(password, gym.passwordHash);
 //     if (!isMatch) return res.status(400).json({ msg: 'Invalid Credentials' });
 
+//     if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET not set');
+
 //     const payload = { gym: { id: gym.id } };
 //     jwt.sign(
 //       payload,
-//       process.env.JWT_SECRET || 'secret123',
+//       process.env.JWT_SECRET,
 //       { expiresIn: '5 days' },
 //       (err, token) => {
 //         if (err) throw err;
@@ -115,19 +119,19 @@
 //     if (!gym) return res.status(404).json({ msg: 'Gym not found' });
 
 //     const otp = generateOtp();
-    
+
 //     await OTP.findOneAndUpdate(
 //       { email },
-//       { otp, createdAt: new Date() },
-//       { upsert: true, new: true }
+//       { otp, createdAt: new Date(), verified: false },
+//       { upsert: true, returnDocument: 'after' }
 //     );
 
-//     await sendOtpEmail(email, otp);
-    
-//     res.json({ 
-//       success: true, 
-//       message: 'OTP sent successfully' 
-//     });
+//     const emailSent = await sendOtpEmail(email, otp);
+//     if (!emailSent) {
+//       return res.status(500).json({ success: false, message: 'Failed to send OTP email' });
+//     }
+
+//     res.json({ success: true, message: 'OTP sent successfully' });
 //   } catch (err) {
 //     console.error(err.message);
 //     res.status(500).send('Server error');
@@ -138,25 +142,22 @@
 //   const { email } = req.body;
 //   try {
 //     const otp = generateOtp();
-    
+
 //     await OTP.findOneAndUpdate(
 //       { email },
-//       { otp, createdAt: new Date() },
-//       { upsert: true, new: true }
+//       { otp, createdAt: new Date(), verified: false },
+//       { upsert: true, returnDocument: 'after' }
 //     );
 
-//     await sendOtpEmail(email, otp);
-    
-//     res.json({ 
-//       success: true, 
-//       message: 'OTP sent successfully' 
-//     });
+//     const emailSent = await sendOtpEmail(email, otp);
+//     if (!emailSent) {
+//       return res.status(500).json({ success: false, message: 'Failed to send OTP email' });
+//     }
+
+//     res.json({ success: true, message: 'OTP sent successfully' });
 //   } catch (err) {
 //     console.error(err.message);
-//     res.status(500).json({ 
-//       success: false, 
-//       message: 'Server error' 
-//     });
+//     res.status(500).json({ success: false, message: 'Server error' });
 //   }
 // };
 
@@ -165,45 +166,35 @@
 //   try {
 //     const otpData = await OTP.findOne({ email, otp });
 //     if (!otpData) {
-//       return res.status(400).json({ 
-//         success: false, 
-//         message: 'Invalid or expired OTP' 
-//       });
+//       return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
 //     }
 
-//     // Mark as verified
 //     otpData.verified = true;
 //     await otpData.save();
 
-//     res.json({ 
-//       success: true, 
-//       message: 'OTP verified' 
-//     });
+//     res.json({ success: true, message: 'OTP verified' });
 //   } catch (err) {
 //     console.error(err.message);
-//     res.status(500).json({ 
-//       success: false, 
-//       message: 'Server error' 
-//     });
+//     res.status(500).json({ success: false, message: 'Server error' });
 //   }
 // };
 
 // exports.resetPassword = async (req, res) => {
 //   const { email, otp, newPassword } = req.body;
 //   try {
-//     const otpData = await OTP.findOne({ email, otp });
+//     const otpData = await OTP.findOne({ email, otp, verified: true });
 //     if (!otpData) return res.status(400).json({ msg: 'Invalid or expired OTP' });
 
 //     const gym = await Gym.findOne({ email });
+//     if (!gym) return res.status(404).json({ msg: 'Gym not found' });
+
 //     const salt = await bcrypt.genSalt(10);
 //     gym.passwordHash = await bcrypt.hash(newPassword, salt);
 //     await gym.save();
 
 //     await OTP.deleteOne({ email });
-//     res.json({ 
-//       success: true, 
-//       message: 'Password reset successful' 
-//     });
+
+//     res.json({ success: true, message: 'Password reset successful' });
 //   } catch (err) {
 //     console.error(err.message);
 //     res.status(500).send('Server error');
@@ -215,7 +206,6 @@
 //     const token = req.header('x-auth-token');
 //     if (!token) return res.status(400).json({ msg: 'No token provided' });
 
-//     // Blacklist the token
 //     const blacklistedToken = new BlacklistedToken({ token });
 //     await blacklistedToken.save();
 
@@ -226,6 +216,8 @@
 //   }
 // };
 
+
+//===================================================================================================================
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -297,10 +289,14 @@ exports.registerGym = async (req, res) => {
           token,
           gym: {
             id: gym.id,
+            gymId: gym.gymId,
             gymName: gym.gymName,
             fullName: gym.fullName,
             email: gym.email,
+            mobileNumber: gym.mobileNumber,
             logoUrl: gym.logoUrl,
+            planEndDate: gym.planEndDate,
+            isFreeTrial: gym.isFreeTrial,
           },
         });
       }
@@ -311,6 +307,7 @@ exports.registerGym = async (req, res) => {
   }
 };
 
+// ── FIXED: now returns gym object with logoUrl ─────────────────────────────
 exports.loginGym = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -329,7 +326,23 @@ exports.loginGym = async (req, res) => {
       { expiresIn: '5 days' },
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        // ── DIAGNOSTIC LOG ──────────────────────────────────────────────────
+        const responseData = {
+          token,
+          gym: {
+            id: gym.id,
+            gymId: gym.gymId,
+            gymName: gym.gymName,
+            fullName: gym.fullName,
+            email: gym.email,
+            mobileNumber: gym.mobileNumber,
+            logoUrl: gym.logoUrl,
+            planEndDate: gym.planEndDate,
+            isFreeTrial: gym.isFreeTrial,
+          },
+        };
+        console.log('Login Success Response:', JSON.stringify(responseData, null, 2));
+        res.json(responseData);
       }
     );
   } catch (err) {

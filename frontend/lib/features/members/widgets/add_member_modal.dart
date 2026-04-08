@@ -1054,17 +1054,20 @@ class _AddMemberModalState extends State<AddMemberModal> with SingleTickerProvid
     decoration: BoxDecoration(color: Colors.white,
         border: Border(top: BorderSide(color: Colors.grey.shade100))),
     child: Consumer<MemberProvider>(
-      builder: (ctx, p, _) => ElevatedButton.icon(
-        onPressed: p.isLoading ? null : _submit,
-        icon: p.isLoading
-            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-            : const Icon(Icons.person_add_rounded, size: 20),
-        label: Text(p.isLoading ? 'Saving...' : 'Save Member',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _red, foregroundColor: Colors.white,
-          minimumSize: const Size(double.infinity, 52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), elevation: 0,
+      builder: (ctx, p, _) => SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: ElevatedButton.icon(
+          onPressed: p.isLoading ? null : _submit,
+          icon: p.isLoading
+              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              : const Icon(Icons.person_add_rounded, size: 20),
+          label: Text(p.isLoading ? 'Saving...' : 'Save Member',
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _red, foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), elevation: 0,
+          ),
         ),
       ),
     ),

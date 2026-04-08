@@ -7,14 +7,24 @@ const mongoose = require('mongoose');
 exports.getCustomReport = async (req, res) => {
   const { startDate, endDate } = req.query;
   try {
-    const gymId = new mongoose.Types.ObjectId(req.gym.id);
+    if (!startDate || !endDate) {
+      return res.status(400).json({ msg: 'Please provide both startDate and endDate' });
+    }
+
     const start = new Date(startDate);
     const end = new Date(endDate);
+    
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return res.status(400).json({ msg: 'Invalid date format' });
+    }
+    
     end.setHours(23, 59, 59, 999);
+
+    const gymId = new mongoose.Types.ObjectId(req.gym.id);
 
     // Counts & Stats
     const newJoiners = await Member.find({
-      gymId: req.gym.id,
+      gymId: gymId,
       joinDate: { $gte: start, $lte: end }
     });
 
@@ -23,24 +33,33 @@ exports.getCustomReport = async (req, res) => {
       {
         $group: {
           _id: null,
-          total: { $sum: { $add: ["$cashAmount", "$upiAmount"] } },
-          upi: { $sum: "$upiAmount" },
-          cash: { $sum: "$cashAmount" },
-          unpaid: { $sum: "$remainingAmount" }
+          total: { 
+            $sum: { 
+              $add: [
+                { $ifNull: ["$cashAmount", 0] }, 
+                { $ifNull: ["$upiAmount", 0] }
+              ] 
+            } 
+          },
+          upi: { $sum: { $ifNull: ["$upiAmount", 0] } },
+          cash: { $sum: { $ifNull: ["$cashAmount", 0] } },
+          unpaid: { $sum: { $ifNull: ["$remainingAmount", 0] } }
         }
       }
     ]);
 
     const expenseData = await Expense.aggregate([
       { $match: { gymId, date: { $gte: start, $lte: end } } },
-      { $group: { _id: null, total: { $sum: "$amount" } } }
+      { $group: { _id: null, total: { $sum: { $ifNull: ["$amount", 0] } } } }
     ]);
 
     // Active/Overdue (Current state snapshot)
-    const allMembers = await Member.find({ gymId: req.gym.id });
+    const allMembers = await Member.find({ gymId: gymId });
     const totalMembers = allMembers.length;
-    const totalTrainers = await Trainer.countDocuments({ gymId: req.gym.id });
+    const totalTrainers = await Trainer.countDocuments({ gymId: gymId });
+    
     const activeMembersList = [];
+    const overdueMembersList = [];
     let activeCount = 0;
     let overdueCount = 0;
 
@@ -49,11 +68,19 @@ exports.getCustomReport = async (req, res) => {
       if (status === 'ACTIVE' || status === 'EXPIRING SOON') {
         activeCount++;
         activeMembersList.push(m);
+      } else if (status === 'OVERDUE') {
+        overdueCount++;
+        overdueMembersList.push(m);
       }
-      if (status === 'OVERDUE') overdueCount++;
     });
 
-    const inactiveCount = totalMembers - activeCount;
+    // Recent Renewals (Payments within the range)
+    const recentRenewalsList = await Member.find({
+      gymId: gymId,
+      paymentDate: { $gte: start, $lte: end }
+    }).sort({ paymentDate: -1 });
+
+    const inactiveCount = totalMembers - activeCount - overdueCount;
 
     res.json({
       summary: {
@@ -62,24 +89,26 @@ exports.getCustomReport = async (req, res) => {
         activeMembers: activeCount,
         inactiveMembers: inactiveCount,
         overdueMembers: overdueCount,
-        revenue: revenueData.length > 0 ? revenueData[0].total : 0,
+        revenue: revenueData.length > 0 ? (revenueData[0].total || 0) : 0,
         revenueDetails: {
-          upi: revenueData.length > 0 ? revenueData[0].upi : 0,
-          cash: revenueData.length > 0 ? revenueData[0].cash : 0,
-          totalPaid: revenueData.length > 0 ? revenueData[0].total : 0,
-          unpaid: revenueData.length > 0 ? revenueData[0].unpaid : 0
+          upi: revenueData.length > 0 ? (revenueData[0].upi || 0) : 0,
+          cash: revenueData.length > 0 ? (revenueData[0].cash || 0) : 0,
+          totalPaid: revenueData.length > 0 ? (revenueData[0].total || 0) : 0,
+          unpaid: revenueData.length > 0 ? (revenueData[0].unpaid || 0) : 0
         },
-        expenses: expenseData.length > 0 ? expenseData[0].total : 0,
+        expenses: expenseData.length > 0 ? (expenseData[0].total || 0) : 0,
         newJoiners: newJoiners.length,
-        unpaidAmount: revenueData.length > 0 ? revenueData[0].unpaid : 0
+        unpaidAmount: revenueData.length > 0 ? (revenueData[0].unpaid || 0) : 0
       },
       lists: {
         activeMembers: activeMembersList,
-        newJoiners: newJoiners
+        newJoiners: newJoiners,
+        overdueMembers: overdueMembersList,
+        recentRenewals: recentRenewalsList
       }
     });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+    console.error('Report Generation Error:', err);
+    res.status(500).json({ error: 'Server Error during report generation', details: err.message });
   }
 };

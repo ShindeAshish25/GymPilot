@@ -25,6 +25,8 @@ app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/whatsapp', require('./routes/whatsappRoutes'));
 app.use('/api/gym', require('./routes/gymRoutes'));
 app.use('/api/expenses', require('./routes/expenseRoutes'));
+app.use('/api/trainers', require('./routes/trainerRoutes'));
+app.use('/api/reports', require('./routes/reportRoutes'));
 
 // Error Handler Middleware
 app.use(errorHandler);

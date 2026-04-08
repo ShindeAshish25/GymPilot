@@ -6,6 +6,7 @@ import '../../providers/member_provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/models/member_model.dart';
 import 'package:intl/intl.dart';
+import 'package:frontend/features/notifications/notifications_screen.dart';
 
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -67,7 +68,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                   builder: (context, auth, _) {
                     final gymName = auth.userProfile?['gymName'] ?? 'GymPro';
                     return Text(
-                      gymName,
+                      title.isNotEmpty ? title : gymName,
                       style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
@@ -84,9 +85,10 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
               children: [
                 Consumer<MemberProvider>(
                   builder: (context, memberProvider, _) {
+                    final count = memberProvider.expiringSoonMembers.length + 
+                                  memberProvider.recentlyOverdueMembers.length;
                     return _NotificationBell(
-                      count: memberProvider.expiringMembers.length,
-                      expiringMembers: memberProvider.expiringMembers,
+                      count: count,
                     );
                   },
                 ),
@@ -103,16 +105,16 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
 
 class _NotificationBell extends StatelessWidget {
   final int count;
-  final List<MemberModel> expiringMembers;
-  const _NotificationBell({required this.count, required this.expiringMembers});
+  const _NotificationBell({required this.count});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (expiringMembers.isNotEmpty) {
-          _showNotificationList(context, expiringMembers);
-        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+        );
       },
       child: Stack(
         clipBehavior: Clip.none,
@@ -201,101 +203,3 @@ class _ProfileAvatar extends StatelessWidget {
   }
 }
 
-void _showNotificationList(BuildContext context, List<MemberModel> expiringMembers) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Members Expiring Soon'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('The following members memberships will expire in 2 days.'),
-            const SizedBox(height: 10),
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: expiringMembers.length > 10 ? 10 : expiringMembers.length,
-                itemBuilder: (context, index) {
-                  final member = expiringMembers[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: member.photoUrl != null ? NetworkImage(member.photoUrl!) : null,
-                      child: member.photoUrl == null ? const Icon(Icons.person) : null,
-                    ),
-                    title: Text(member.name),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showMemberDetailModal(context, member);
-                    },
-                  );
-                },
-              ),
-            ),
-            if (expiringMembers.length > 10)
-              TextButton(onPressed: () {}, child: const Text('See All')),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
-      ],
-    ),
-  );
-}
-
-void _showMemberDetailModal(BuildContext context, MemberModel member) {
-  showDialog(
-    context: context,
-    builder: (context) => Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: member.photoUrl != null ? NetworkImage(member.photoUrl!) : null,
-              child: member.photoUrl == null ? const Icon(Icons.person, size: 50) : null,
-            ),
-            const SizedBox(height: 15),
-            Text(member.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            _detailRow(Icons.phone, 'Mobile', member.phone),
-            _detailRow(Icons.calendar_today, 'Last Payment', member.paymentDate != null ? DateFormat('dd MMM yyyy').format(member.paymentDate!) : 'N/A'),
-            _detailRow(Icons.money, 'Remaining', '₹${member.remainingAmount}'),
-            _detailRow(Icons.timer, 'Duration', '${member.membershipDuration ?? 0} Months'),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                child: const Text('Close', style: TextStyle(color: Colors.white)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-Widget _detailRow(IconData icon, String label, String value) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 5),
-    child: Row(
-      children: [
-        Icon(icon, size: 18, color: Colors.grey),
-        const SizedBox(width: 10),
-        Text('$label: ', style: const TextStyle(fontWeight: FontWeight.w600)),
-        Text(value),
-      ],
-    ),
-  );
-}

@@ -63,203 +63,194 @@ class _LoginScreenState extends State<LoginScreen> {
           color: AppColors.background.withValues(alpha: 0.1),
         ),
         child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Card(
-                elevation: 0,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(40),
-                  side: BorderSide(color: Colors.black.withValues(alpha: 0.05)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Fitness Icon in Circle
-                        Center(
-                          child: Container(
-                            width: 100,
-                            height: 100,
-                            decoration: const BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primary,
-                                  blurRadius: 20,
-                                  offset: Offset(0, 10),
-                                  spreadRadius: -5,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+              return SingleChildScrollView(
+                physics: keyboardVisible ? const ClampingScrollPhysics() : const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight - 40.0,
+                  ),
+                  child: Center(
+                    child: Card(
+                      elevation: 0,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(40),
+                        side: BorderSide(color: Colors.black.withValues(alpha: 0.05)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // Fitness Icon in Circle
+                              Center(
+                                child: Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.primary,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.primary,
+                                        blurRadius: 20,
+                                        offset: Offset(0, 10),
+                                        spreadRadius: -5,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.fitness_center_rounded,
+                                    size: 50,
+                                    color: Colors.white,
+                                  ),
+                                ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
+                              ),
+                              const SizedBox(height: 32),
+                              const Text(
+                                'Welcome Back',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 36,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.darkSurface,
+                                  letterSpacing: -1,
                                 ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.fitness_center_rounded,
-                              size: 50,
-                              color: Colors.white,
-                            ),
-                          ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
-                        ),
-                        const SizedBox(height: 32),
-                        const Text(
-                          'Welcome Back',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.darkSurface,
-                            letterSpacing: -1,
-                          ),
-                        ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Access your gym management\ndashboard',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppColors.textSecondary,
-                            height: 1.4,
-                          ),
-                        ).animate().fadeIn(delay: 400.ms),
-                        const SizedBox(height: 48),
-                        
-                        // Username Field
-                        const Text(
-                          '   Username',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          style: const TextStyle(color: AppColors.textPrimary),
-                          decoration: InputDecoration(
-                            hintText: 'Enter your username',
-                            prefixIcon: const Icon(Icons.person_outline_rounded),
-                            filled: true,
-                            fillColor: AppColors.surfaceLight.withValues(alpha: 0.3),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) return 'Please enter your username';
-                            return null;
-                          },
-                        ).animate().fadeIn(delay: 500.ms),
-                        
-                        const SizedBox(height: 24),
-                        
-                        // Password Field
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              '   Password',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                            ),
-                            TextButton(
-                              onPressed: () => context.push('/forgot-password'),
-                              child: const Text(
-                                'Forgot password?',
-                                style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
+                              ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
+                              const SizedBox(height: 12),
+                              const Text(
+                                'Access your gym management\ndashboard',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: AppColors.textSecondary,
+                                  height: 1.4,
+                                ),
+                              ).animate().fadeIn(delay: 400.ms),
+                              const SizedBox(height: 48),
+                              
+                              // Username Field
+                              const Text(
+                                '   Username',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                               ),
-                            ),
-                          ],
-                        ),
-                        TextFormField(
-                          controller: _passwordController,
-                          obscureText: _obscurePassword,
-                          style: const TextStyle(color: AppColors.textPrimary),
-                          decoration: InputDecoration(
-                            hintText: '••••••••',
-                            prefixIcon: const Icon(Icons.lock_outline_rounded),
-                            filled: true,
-                            fillColor: AppColors.surfaceLight.withValues(alpha: 0.3),
-                            suffixIcon: IconButton(
-                              icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) return 'Please enter your password';
-                            return null;
-                          },
-                        ).animate().fadeIn(delay: 600.ms),
-                        
-                        const SizedBox(height: 20),
-                        
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: true, 
-                              onChanged: (v) {},
-                              activeColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                            ),
-                            const Text('Remember me', style: TextStyle(color: AppColors.textSecondary)),
-                          ],
-                        ).animate().fadeIn(delay: 700.ms),
-                        
-                        const SizedBox(height: 32),
-                        
-                        isLoading 
-                          ? const Center(child: CircularProgressIndicator())
-                          : GradientButton(
-                              text: 'SIGN IN',
-                              onPressed: _handleLogin,
-                              suffixIcon: const Icon(Icons.login, color: Colors.white, size: 20),
-                            ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.2, end: 0),
-                        
-                        const SizedBox(height: 24),
-                        
-                        Center(
-                          child: TextButton(
-                            onPressed: () => context.push('/signup'),
-                            child: RichText(
-                              text: const TextSpan(
-                                text: "Don't have an account? ",
-                                style: TextStyle(color: AppColors.textSecondary),
+                              const SizedBox(height: 8),
+                              TextFormField(
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                style: const TextStyle(color: AppColors.textPrimary),
+                                decoration: InputDecoration(
+                                  hintText: 'Enter your username',
+                                  prefixIcon: const Icon(Icons.person_outline_rounded),
+                                  filled: true,
+                                  fillColor: AppColors.surfaceLight.withValues(alpha: 0.3),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) return 'Please enter your username';
+                                  return null;
+                                },
+                              ).animate().fadeIn(delay: 500.ms),
+                              
+                              const SizedBox(height: 24),
+                              
+                              // Password Field
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  TextSpan(
-                                    text: 'Sign Up',
-                                    style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                                  const Text(
+                                    '   Password',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => context.push('/forgot-password'),
+                                    child: const Text(
+                                      'Forgot password?',
+                                      style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ),
-                        ).animate().fadeIn(delay: 850.ms),
+                              TextFormField(
+                                controller: _passwordController,
+                                obscureText: _obscurePassword,
+                                style: const TextStyle(color: AppColors.textPrimary),
+                                decoration: InputDecoration(
+                                  hintText: '••••••••',
+                                  prefixIcon: const Icon(Icons.lock_outline_rounded),
+                                  filled: true,
+                                  fillColor: AppColors.surfaceLight.withValues(alpha: 0.3),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) return 'Please enter your password';
+                                  return null;
+                                },
+                              ).animate().fadeIn(delay: 600.ms),
+                              
+                              const SizedBox(height: 20),
+                              
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    value: true, 
+                                    onChanged: (v) {},
+                                    activeColor: AppColors.primary,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                  ),
+                                  const Text('Remember me', style: TextStyle(color: AppColors.textSecondary)),
+                                ],
+                              ).animate().fadeIn(delay: 700.ms),
+                              
+                              const SizedBox(height: 32),
+                              
+                              isLoading 
+                                ? const Center(child: CircularProgressIndicator())
+                                : GradientButton(
+                                    text: 'SIGN IN',
+                                    onPressed: _handleLogin,
+                                    suffixIcon: const Icon(Icons.login, color: Colors.white, size: 20),
+                                  ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.2, end: 0),
+                              
+                              const SizedBox(height: 24),
+                              
+                              Center(
+                                child: TextButton(
+                                  onPressed: () => context.push('/signup'),
+                                  child: RichText(
+                                    text: const TextSpan(
+                                      text: "Don't have an account? ",
+                                      style: TextStyle(color: AppColors.textSecondary),
+                                      children: [
+                                        TextSpan(
+                                          text: 'Sign Up',
+                                          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ).animate().fadeIn(delay: 850.ms),
 
-                        const SizedBox(height: 24),
-                        
-                        Center(
-                          child: TextButton(
-                            onPressed: () {
-                              // Link to support
-                            },
-                            child: RichText(
-                              text: const TextSpan(
-                                text: 'Need help? ',
-                                style: TextStyle(color: AppColors.textSecondary),
-                                children: [
-                                  TextSpan(
-                                    text: 'Contact Support',
-                                    style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ),
+                              const SizedBox(height: 24),
+                            ],
                           ),
-                        ).animate().fadeIn(delay: 900.ms),
-                      ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ),
       ),

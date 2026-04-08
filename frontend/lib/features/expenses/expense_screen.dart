@@ -23,6 +23,10 @@ class _ExpenseScreenState extends State<ExpenseScreen> with SingleTickerProvider
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
 
+  // List filters
+  String _listFilter = 'Month';
+  DateTimeRange? _customDateRange;
+
   final List<Color> _chartColors = [
      AppColors.primary,
      const Color(0xFFD0EAE4),
@@ -33,7 +37,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = Provider.of<ExpenseProvider>(context, listen: false);
       provider.fetchExpenses();
@@ -77,9 +81,10 @@ class _ExpenseScreenState extends State<ExpenseScreen> with SingleTickerProvider
               unselectedLabelColor: AppColors.textSecondary,
               indicatorColor: AppColors.primary,
               indicatorWeight: 3,
-              labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               tabs: const [
-                 Tab(text: 'Add Expense'),
+                 Tab(text: 'Add'),
+                 Tab(text: 'List'),
                  Tab(text: 'Analysis'),
               ],
            ),
@@ -89,6 +94,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> with SingleTickerProvider
         controller: _tabController,
         children: [
           _buildAddExpenseTab(),
+          _buildListTab(),
           _buildAnalysisTab(),
         ],
       ),
@@ -156,7 +162,16 @@ class _ExpenseScreenState extends State<ExpenseScreen> with SingleTickerProvider
             ),
             const SizedBox(height: 20),
             
-            _buildFormLabel('Category'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildFormLabel('Category'),
+                TextButton(
+                  onPressed: _showAddCategoryDialog,
+                  child: const Text('+ Add Type', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13)),
+                ),
+              ],
+            ),
             Consumer<ExpenseProvider>(
               builder: (context, provider, _) {
                 return Container(
@@ -200,7 +215,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> with SingleTickerProvider
                   keyboardType: TextInputType.number,
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                   decoration: const InputDecoration(
-                     prefixText: '\$ ',
+                     prefixText: '₹ ',
                      prefixStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
                      hintText: '0.00',
                      hintStyle: TextStyle(color: AppColors.textMuted),
@@ -261,66 +276,84 @@ class _ExpenseScreenState extends State<ExpenseScreen> with SingleTickerProvider
   }
 
   Widget _buildSmallMonthlyAnalysis() {
-     return Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-           color: Colors.white,
-           borderRadius: BorderRadius.circular(24),
-           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 5))],
-        ),
-        child: Column(
-           crossAxisAlignment: CrossAxisAlignment.start,
-           children: [
-              const Text('Monthly Analysis', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-              const SizedBox(height: 24),
-              Row(
-                 crossAxisAlignment: CrossAxisAlignment.center,
-                 children: [
-                    SizedBox(
-                       width: 120,
-                       height: 120,
-                       child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                             PieChart(
-                                PieChartData(
-                                   sectionsSpace: 0,
-                                   centerSpaceRadius: 45,
-                                   startDegreeOffset: 180,
-                                   sections: [
-                                      PieChartSectionData(color: AppColors.primary, value: 60, radius: 15, showTitle: false),
-                                      PieChartSectionData(color: AppColors.primary.withOpacity(0.1), value: 40, radius: 15, showTitle: false),
-                                   ],
-                                ),
-                             ),
-                             Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                   Text('Total', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                                   Text('\$4,250', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary)),
-                                ],
-                             ),
-                          ],
-                       ),
-                    ),
-                    const SizedBox(width: 24),
-                    Expanded(
-                       child: Column(
-                          children: [
-                             _buildMiniBar('Rent', '\$2,000', 0.6),
-                             const SizedBox(height: 16),
-                             _buildMiniBar('Staff', '\$1,500', 0.45),
-                          ]
-                       ),
-                    )
-                 ]
-              )
-           ],
-        ),
+     return Consumer<ExpenseProvider>(
+        builder: (context, provider, _) {
+           final hasData = provider.analysis.isNotEmpty;
+           final total = hasData ? provider.analysis.fold<double>(0, (sum, item) => sum + (item['total'] as num).toDouble()) : 0.0;
+           final sortedAnalysis = List<Map<String, dynamic>>.from(provider.analysis)
+              ..sort((a, b) => (b['total'] as num).compareTo(a['total'] as num));
+           final topCategories = sortedAnalysis.take(2).toList();
+
+           return Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                 color: Colors.white,
+                 borderRadius: BorderRadius.circular(24),
+                 boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 5))],
+              ),
+              child: Column(
+                 crossAxisAlignment: CrossAxisAlignment.start,
+                //  children: [
+                //     const Text('Monthly Analysis', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                //     const SizedBox(height: 24),
+                //     hasData ? Row(
+                //        crossAxisAlignment: CrossAxisAlignment.center,
+                //        children: [
+                //           SizedBox(
+                //              width: 120,
+                //              height: 120,
+                //              child: Stack(
+                //                 alignment: Alignment.center,
+                //                 children: [
+                //                    PieChart(
+                //                       PieChartData(
+                //                          sectionsSpace: 0,
+                //                          centerSpaceRadius: 45,
+                //                          startDegreeOffset: 180,
+                //                          sections: sortedAnalysis.asMap().entries.map((e) {
+                //                             final index = e.key;
+                //                             return PieChartSectionData(
+                //                                color: _chartColors[index % _chartColors.length], 
+                //                                value: (e.value['total'] as num).toDouble(), 
+                //                                radius: 15, 
+                //                                showTitle: false
+                //                             );
+                //                          }).toList(),
+                //                       ),
+                //                    ),
+                //                    Column(
+                //                       mainAxisSize: MainAxisSize.min,
+                //                       children: [
+                //                          const Text('Total', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+                //                          Text('₹${total.toStringAsFixed(0)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                //                       ],
+                //                    ),
+                //                 ],
+                //              ),
+                //           ),
+                //           const SizedBox(width: 24),
+                //           Expanded(
+                //              child: Column(
+                //                 children: topCategories.asMap().entries.map((e) {
+                //                   final val = (e.value['total'] as num).toDouble();
+                //                   final percent = total > 0 ? (val / total) : 0.0;
+                //                   return Padding(
+                //                      padding: const EdgeInsets.only(bottom: 16),
+                //                      child: _buildMiniBar(e.value['categoryName'] ?? 'Other', '₹${val.toStringAsFixed(0)}', percent, color: _chartColors[e.key % _chartColors.length]),
+                //                   );
+                //                 }).toList(),
+                //              ),
+                //           )
+                //        ]
+                //     ) : const Center(child: Text('No expenses recorded yet', style: TextStyle(color: AppColors.textMuted))),
+                //  ],
+              ),
+           );
+        }
      );
   }
 
-  Widget _buildMiniBar(String label, String amount, double percent) {
+  Widget _buildMiniBar(String label, String amount, double percent, {Color color = AppColors.primary}) {
      return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -334,13 +367,180 @@ class _ExpenseScreenState extends State<ExpenseScreen> with SingleTickerProvider
            const SizedBox(height: 6),
            LinearProgressIndicator(
               value: percent,
-              backgroundColor: AppColors.primary.withOpacity(0.1),
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              backgroundColor: color.withOpacity(0.1),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
               minHeight: 6,
               borderRadius: BorderRadius.circular(3),
            ),
         ],
      );
+  }
+
+  Widget _buildListTab() {
+    return Column(
+      children: [
+        _buildListFilters(),
+        Expanded(
+          child: Consumer<ExpenseProvider>(
+            builder: (context, provider, _) {
+              if (provider.isLoading && provider.expenses.isEmpty) {
+                 return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+              }
+
+              final now = DateTime.now();
+              final filtered = provider.expenses.where((e) {
+                if (_listFilter == 'Day') {
+                  return e.date.year == now.year && e.date.month == now.month && e.date.day == now.day;
+                } else if (_listFilter == 'Week') {
+                  // A week consists of the last 7 days
+                  final weekAgo = now.subtract(const Duration(days: 7));
+                  return e.date.isAfter(weekAgo) || e.date.isAtSameMomentAs(weekAgo);
+                } else if (_listFilter == 'Month') {
+                  return e.date.year == now.year && e.date.month == now.month;
+                } else if (_listFilter == 'Custom' && _customDateRange != null) {
+                  final start = _customDateRange!.start;
+                  final end = _customDateRange!.end.add(const Duration(days: 1)).subtract(const Duration(milliseconds: 1));
+                  return e.date.isAfter(start.subtract(const Duration(milliseconds: 1))) && e.date.isBefore(end.add(const Duration(milliseconds: 1)));
+                }
+                return true;
+              }).toList();
+
+              if (filtered.isEmpty) {
+                 return const Center(child: Text('No expenses found for this period.', style: TextStyle(color: AppColors.textMuted)));
+              }
+
+              final groupedExpenses = <String, List<ExpenseModel>>{};
+              for (var exp in filtered) {
+                 groupedExpenses.putIfAbsent(exp.categoryName, () => []).add(exp);
+              }
+              final categoryNames = groupedExpenses.keys.toList();
+
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: categoryNames.length,
+                itemBuilder: (context, index) {
+                  final catName = categoryNames[index];
+                  final exps = groupedExpenses[catName]!;
+                  final catTotal = exps.fold(0.0, (sum, item) => sum + item.amount);
+
+                  return Card(
+                    elevation: 0,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade200)),
+                    child: Theme(
+                      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                      child: ExpansionTile(
+                        leading: CircleAvatar(
+                          backgroundColor: AppColors.primary.withOpacity(0.1),
+                          child: const Icon(Icons.receipt_long, color: AppColors.primary, size: 20),
+                        ),
+                        title: Text(catName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+                        trailing: Text('₹${catTotal.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primary)),
+                        children: exps.map((exp) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        exp.notes != null && exp.notes!.isNotEmpty ? exp.notes! : 'No notes provided',
+                                        style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(DateFormat('MMM dd, yyyy').format(exp.date), style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                                    ],
+                                  ),
+                                ),
+                                Text('₹${exp.amount.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                const SizedBox(width: 8),
+                                PopupMenuButton<String>(
+                                  icon: const Icon(Icons.more_vert, size: 20, color: AppColors.textSecondary),
+                                  onSelected: (value) {
+                                    if (value == 'edit') {
+                                      _editExpenseDialog(exp);
+                                    } else if (value == 'delete') {
+                                      _deleteExpenseConfirm(exp);
+                                    }
+                                  },
+                                  itemBuilder: (context) => [
+                                    const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                                    const PopupMenuItem(value: 'delete', child: Text('Delete', style: TextStyle(color: Colors.red))),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildListFilters() {
+    final filters = ['Day', 'Week', 'Month', 'Custom'];
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: filters.map((filter) {
+            final isSelected = _listFilter == filter;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ChoiceChip(
+                label: Text(filter, style: TextStyle(
+                  color: isSelected ? Colors.white : AppColors.textPrimary,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal
+                )),
+                selected: isSelected,
+                selectedColor: AppColors.primary,
+                backgroundColor: AppColors.surfaceLight,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isSelected ? AppColors.primary : Colors.grey.shade200)),
+                onSelected: (selected) async {
+                  if (selected) {
+                    if (filter == 'Custom') {
+                      final range = await showDateRangePicker(
+                        context: context,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now(),
+                        initialDateRange: _customDateRange,
+                        builder: (context, child) => Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: const ColorScheme.light(primary: AppColors.primary),
+                          ),
+                          child: child!,
+                        ),
+                      );
+                      if (range != null) {
+                        setState(() {
+                          _listFilter = 'Custom';
+                          _customDateRange = range;
+                        });
+                      }
+                    } else {
+                      setState(() {
+                        _listFilter = filter;
+                      });
+                    }
+                  }
+                },
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
   }
 
   Widget _buildAnalysisTab() {
@@ -425,7 +625,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> with SingleTickerProvider
                                 children: [
                                    const Text('Spent Total', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
                                    const SizedBox(height: 4),
-                                   Text('\$${total.toStringAsFixed(0)}', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                                   Text('₹${total.toStringAsFixed(0)}', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.primary)),
                                 ],
                              )
                           ],
@@ -484,7 +684,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> with SingleTickerProvider
                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                    children: [
                                       Text(data['categoryName'] ?? 'Other', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                                      Text('\$${val.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                      Text('₹${val.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                                    ],
                                 ),
                                 const SizedBox(height: 4),
@@ -508,12 +708,133 @@ class _ExpenseScreenState extends State<ExpenseScreen> with SingleTickerProvider
      );
   }
 
+  void _showAddCategoryDialog() {
+    final catController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Add Expense Type'),
+        content: TextField(
+          controller: catController,
+          decoration: InputDecoration(
+            hintText: 'e.g. Electricity, Operations',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (catController.text.trim().isEmpty) return;
+              final p = Provider.of<ExpenseProvider>(context, listen: false);
+              final ok = await p.addCategory({'name': catController.text.trim()});
+              if (ok && mounted) {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Category added!')));
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteExpenseConfirm(ExpenseModel exp) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Expense?'),
+        content: Text('Are you sure you want to delete this expense of ₹${exp.amount.toStringAsFixed(2)} under ${exp.categoryName}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final provider = Provider.of<ExpenseProvider>(context, listen: false);
+              final success = await provider.deleteExpense(exp.id);
+              if (success && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Expense deleted')));
+                provider.fetchAnalysis(); // sync pie chart dynamically
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _editExpenseDialog(ExpenseModel exp) {
+    final editAmountController = TextEditingController(text: exp.amount.toString());
+    final editNotesController = TextEditingController(text: exp.notes ?? '');
+    
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Edit ${exp.categoryName} Expense'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: editAmountController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Amount (₹)', border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: editNotesController,
+              decoration: const InputDecoration(labelText: 'Notes', border: OutlineInputBorder()),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newAmt = double.tryParse(editAmountController.text);
+              if (newAmt == null || newAmt <= 0) return;
+              
+              Navigator.pop(ctx);
+              final provider = Provider.of<ExpenseProvider>(context, listen: false);
+              final success = await provider.updateExpense(exp.id, {
+                'amount': newAmt,
+                'notes': editNotesController.text,
+              });
+              if (success && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Expense updated')));
+                provider.fetchAnalysis(); // sync pie chart dynamically
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _submitExpense() async {
     if (_formKey.currentState!.validate()) {
       if (_selectedCategory == null) return;
       
       final provider = Provider.of<ExpenseProvider>(context, listen: false);
       final data = {
+        'category': _selectedCategory!.name, // Submitting name since backend expects string category name usually or update backend model 
         'categoryId': _selectedCategory!.id,
         'amount': double.tryParse(_amountController.text) ?? 0.0,
         'date': _selectedDate.toIso8601String(),

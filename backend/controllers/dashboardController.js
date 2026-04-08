@@ -40,13 +40,13 @@ exports.getDashboardStats = async (req, res) => {
     // 3. Revenue
     const revenueData = await Member.aggregate([
       { $match: { gymId, paymentDate: { $gte: startOfMonth, $lte: endOfMonth } } },
-      { $group: { _id: null, total: { $sum: { $add: ["$cashAmount", "$upiAmount"] } } } }
+      { $group: { _id: null, total: { $sum: { $add: [{ $ifNull: ["$cashAmount", 0] }, { $ifNull: ["$upiAmount", 0] }] } } } }
     ]);
     const revenue = revenueData.length > 0 ? revenueData[0].total : 0;
 
     const prevRevenueData = await Member.aggregate([
       { $match: { gymId, paymentDate: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
-      { $group: { _id: null, total: { $sum: { $add: ["$cashAmount", "$upiAmount"] } } } }
+      { $group: { _id: null, total: { $sum: { $add: [{ $ifNull: ["$cashAmount", 0] }, { $ifNull: ["$upiAmount", 0] }] } } } }
     ]);
     const prevRevenue = prevRevenueData.length > 0 ? prevRevenueData[0].total : 0;
 
@@ -195,7 +195,7 @@ exports.getChartData = async (req, res) => {
     } else if (type === 'summary') {
       const revenueTotal = await Member.aggregate([
         { $match: { gymId, paymentDate: { $gte: startDate } } },
-        { $group: { _id: null, total: { $sum: { $add: ["$cashAmount", "$upiAmount"] } } } }
+        { $group: { _id: null, total: { $sum: { $add: [{ $ifNull: ["$cashAmount", 0] }, { $ifNull: ["$upiAmount", 0] }] } } } }
       ]);
       const expenseTotal = await Expense.aggregate([
         { $match: { gymId, date: { $gte: startDate } } },

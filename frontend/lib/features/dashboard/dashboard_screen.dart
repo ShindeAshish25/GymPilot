@@ -105,7 +105,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
                 ),
-                _buildNotificationIcon(),
               ],
             ),
             const SizedBox(height: 8),
@@ -383,8 +382,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         const SizedBox(height: 24),
         _buildOverallSummaryCard(),
-        const SizedBox(height: 24),
-        _buildLatestJoinersCard(),
       ],
     );
   }
@@ -563,63 +560,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Attendance Trends',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  Text(
-                    'Daily check-ins last 30 days',
-                    style: TextStyle(fontSize: 12, color: AppColors.muted),
-                  ),
-                ],
-              ),
-              Icon(Icons.calendar_today_rounded, color: AppColors.primary, size: 20),
-            ],
-          ),
-          const SizedBox(height: 32),
-          SizedBox(
-            height: 180,
-            child: hasData
-                ? LineChart(
-                    LineChartData(
-                      gridData: const FlGridData(show: false),
-                      titlesData: const FlTitlesData(show: false),
-                      borderData: FlBorderData(show: false),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: provider.attendanceChartData.asMap().entries.map((e) {
-                            return FlSpot(e.key.toDouble(), e.value.value);
-                          }).toList(),
-                          isCurved: true,
-                          color: AppColors.primary,
-                          barWidth: 4,
-                          isStrokeCapRound: true,
-                          dotData: const FlDotData(show: false),
-                          belowBarData: BarAreaData(
-                            show: true,
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : const Center(child: Text('No attendance data available', style: TextStyle(color: AppColors.muted))),
-          ),
-        ],
-      ),
+      // child: Column(
+      //   crossAxisAlignment: CrossAxisAlignment.start,
+      //   children: [
+      //     const Row(
+      //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //       children: [
+      //         Column(
+      //           crossAxisAlignment: CrossAxisAlignment.start,
+      //           children: [
+      //             Text(
+      //               'Attendance Trends',
+      //               style: TextStyle(
+      //                 fontSize: 18,
+      //                 fontWeight: FontWeight.w800,
+      //                 color: AppColors.textPrimary,
+      //               ),
+      //             ),
+      //             Text(
+      //               'Daily check-ins last 30 days',
+      //               style: TextStyle(fontSize: 12, color: AppColors.muted),
+      //             ),
+      //           ],
+      //         ),
+      //         Icon(Icons.calendar_today_rounded, color: AppColors.primary, size: 20),
+      //       ],
+      //     ),
+      //     const SizedBox(height: 32),
+      //     SizedBox(
+      //       height: 180,
+      //       child: hasData
+      //           ? LineChart(
+      //               LineChartData(
+      //                 gridData: const FlGridData(show: false),
+      //                 titlesData: const FlTitlesData(show: false),
+      //                 borderData: FlBorderData(show: false),
+      //                 lineBarsData: [
+      //                   LineChartBarData(
+      //                     spots: provider.attendanceChartData.asMap().entries.map((e) {
+      //                       return FlSpot(e.key.toDouble(), e.value.value);
+      //                     }).toList(),
+      //                     isCurved: true,
+      //                     color: AppColors.primary,
+      //                     barWidth: 4,
+      //                     isStrokeCapRound: true,
+      //                     dotData: const FlDotData(show: false),
+      //                     belowBarData: BarAreaData(
+      //                       show: true,
+      //                       color: AppColors.primary.withValues(alpha: 0.1),
+      //                     ),
+      //                   ),
+      //                 ],
+      //               ),
+      //             )
+      //           : const Center(child: Text('No attendance data available', style: TextStyle(color: AppColors.muted))),
+      //     ),
+      //   ],
+      // ),
     );
   }
 
@@ -889,116 +886,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildLatestJoinersCard() {
-    return Consumer<MemberProvider>(builder: (context, provider, _) {
-      final joiners = provider.members.take(3).toList();
-
-      return Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.05)),
-        ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Latest Joiners', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-                TextButton(onPressed: () {}, child: const Text('View All', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800, fontSize: 13))),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (joiners.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                child: Text('No members yet', style: TextStyle(color: AppColors.muted)),
-              )
-            else
-              ...joiners.expand((member) => [
-                    _buildJoinerItem(
-                      member.name,
-                      '${(member.trainingType ?? "Plan").toUpperCase()} • ${member.memberId.isNotEmpty ? member.memberId : member.id.substring(0, 4)}',
-                      'https://ui-avatars.com/api/?name=${member.name}&background=random',
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12.0),
-                      child: Divider(color: Colors.white, height: 1),
-                    ),
-                  ]),
-          ],
-        ),
-      );
-    });
-  }
-
-  Widget _buildJoinerItem(String name, String details, String imgUrl) {
-    return Row(
-      children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-            border: Border.all(color: Colors.white, width: 2),
-            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
-            image: DecorationImage(image: NetworkImage(imgUrl), fit: BoxFit.cover),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
-            const SizedBox(height: 2),
-            Text(details.toUpperCase(), style: const TextStyle(fontSize: 9, color: AppColors.muted, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
-          ],
-        ),
-      ],
-    );
-  }
-
-  void _showNotifications(BuildContext context) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
-  }
-
-  Widget _buildNotificationIcon() {
-    return Consumer<MemberProvider>(
-      builder: (context, provider, _) {
-        final count = provider.expiringSoonMembers.length + provider.recentlyOverdueMembers.length;
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.notifications_none_rounded, color: Colors.white, size: 28),
-              onPressed: () => _showNotifications(context),
-            ),
-            if (count > 0)
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(color: Color(0xFFFF4D67), shape: BoxShape.circle),
-                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                  child: Text(
-                    '$count',
-                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showExpiringMembersDetails(BuildContext context, List<MemberModel> members) {
-    _showNotifications(context);
-  }
 
   Widget _buildOverdueSection() {
     return Consumer<MemberProvider>(

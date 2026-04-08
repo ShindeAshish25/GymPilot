@@ -28,6 +28,8 @@ const MemberSchema = new mongoose.Schema({
   batch: { type: String, enum: ['Morning', 'Evening'] },
   trainingType: { type: String }, // e.g., 'cardio', 'strength', 'personal', etc.
   trainerId: { type: mongoose.Schema.Types.ObjectId, ref: 'trainer' },
+  wantPersonalTraining: { type: Boolean, default: false },
+  personalTrainingDuration: { type: Number }, // in months
   
   // Payment Details
   totalFee: { type: Number },

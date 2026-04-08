@@ -44,6 +44,32 @@ exports.addExpense = async (req, res) => {
   }
 };
 
+exports.updateExpense = async (req, res) => {
+  try {
+    const expense = await Expense.findOneAndUpdate(
+      { _id: req.params.id, gymId: req.gym.id },
+      { $set: req.body },
+      { new: true }
+    );
+    if (!expense) return res.status(404).json({ msg: 'Expense not found' });
+    res.json(expense);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+exports.deleteExpense = async (req, res) => {
+  try {
+    const expense = await Expense.findOneAndDelete({ _id: req.params.id, gymId: req.gym.id });
+    if (!expense) return res.status(404).json({ msg: 'Expense not found' });
+    res.json({ msg: 'Expense removed' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 exports.getExpenses = async (req, res) => {
   try {
     const expenses = await Expense.find({ gymId: req.gym.id }).sort({ date: -1 });
@@ -63,6 +89,13 @@ exports.getExpenseAnalysis = async (req, res) => {
         $group: {
           _id: "$category",
           total: { $sum: "$amount" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          categoryName: "$_id",
+          total: 1
         }
       }
     ]);

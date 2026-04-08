@@ -69,6 +69,41 @@ class ExpenseProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> updateExpense(String id, Map<String, dynamic> data) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final updatedExpense = await _repository.updateExpense(id, data);
+      final index = _expenses.indexWhere((e) => e.id == id);
+      if (index != -1) {
+        _expenses[index] = updatedExpense;
+      }
+      return true;
+    } catch (e) {
+      debugPrint('Error updating expense: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> deleteExpense(String id) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _repository.deleteExpense(id);
+      _expenses.removeWhere((e) => e.id == id);
+      return true;
+    } catch (e) {
+      debugPrint('Error deleting expense: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> addCategory(Map<String, dynamic> data) async {
     _isLoading = true;
     notifyListeners();

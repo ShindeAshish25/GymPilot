@@ -65,6 +65,10 @@ class MemberModel {
   final String? description;
   final String? status;
   final List<PhysicalDetail> physicalDetails;
+  
+  final bool wantPersonalTraining;
+  final int? personalTrainingDuration; // In months
+  final String? trainerId;
 
   // ── Computed Properties for Membership Logic ───────────────────
   
@@ -132,6 +136,9 @@ class MemberModel {
     this.description,
     this.status,
     this.physicalDetails = const [],
+    this.wantPersonalTraining = false,
+    this.personalTrainingDuration,
+    this.trainerId,
   });
 
   factory MemberModel.fromJson(Map<String, dynamic> json) {
@@ -164,6 +171,11 @@ class MemberModel {
       physicalDetails: (json['physicalDetails'] as List? ?? [])
           .map((e) => PhysicalDetail.fromJson(e))
           .toList(),
+      wantPersonalTraining: json['wantPersonalTraining'] ?? false,
+      personalTrainingDuration: json['personalTrainingDuration'] != null
+          ? int.tryParse(json['personalTrainingDuration'].toString())
+          : null,
+      trainerId: json['trainerId'],
     );
   }
 
@@ -193,6 +205,9 @@ class MemberModel {
       'description': description,
       'status': status,
       'physicalDetails': physicalDetails.map((e) => e.toJson()).toList(),
+      'wantPersonalTraining': wantPersonalTraining,
+      'personalTrainingDuration': personalTrainingDuration,
+      'trainerId': trainerId,
     };
   }
 }
