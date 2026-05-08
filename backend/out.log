@@ -1,0 +1,112 @@
+[dotenv@17.3.1] injecting env (5) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+Server started on port 5000
+MongoDB Connected...
+
+-----------------------------------
+[VERIFICATION] Attempting to send OTP to gauravshinde9075@gmail.com...
+Using EMAIL_USER: shinde.ashish1815@gmail.com
+-----------------------------------
+
+CRITICAL ERROR: Failed to send email.
+Error Code: EAUTH
+Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2ba7ca106e8sm19129555ad.62 - gsmtp
+SMTP Response: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2ba7ca106e8sm19129555ad.62 - gsmtp
+
+-----------------------------------
+[VERIFICATION] Attempting to send OTP to sujaljathar729@gmail.com...
+Using EMAIL_USER: shinde.ashish1815@gmail.com
+-----------------------------------
+
+CRITICAL ERROR: Failed to send email.
+Error Code: EAUTH
+Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2ba7bf2cd19sm18538375ad.24 - gsmtp
+SMTP Response: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2ba7bf2cd19sm18538375ad.24 - gsmtp
+
+-----------------------------------
+[VERIFICATION] Attempting to send OTP to sujaljathar729@gmail.com...
+Using EMAIL_USER: shinde.ashish1815@gmail.com
+-----------------------------------
+
+CRITICAL ERROR: Failed to send email.
+Error Code: EAUTH
+Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c8242bbd63bsm1529021a12.29 - gsmtp
+SMTP Response: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c8242bbd63bsm1529021a12.29 - gsmtp
+
+-----------------------------------
+[VERIFICATION] Attempting to send OTP to sujaljathar729@gmail.com...
+Using EMAIL_USER: shinde.ashish1815@gmail.com
+-----------------------------------
+
+CRITICAL ERROR: Failed to send email.
+Error Code: EAUTH
+Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2ba7c9e0fb6sm29551895ad.40 - gsmtp
+SMTP Response: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2ba7c9e0fb6sm29551895ad.40 - gsmtp
+
+-----------------------------------
+[VERIFICATION] Attempting to send OTP to sujaljathar729@gmail.com...
+Using EMAIL_USER: shinde.ashish1815@gmail.com
+-----------------------------------
+
+CRITICAL ERROR: Failed to send email.
+Error Code: EAUTH
+Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2ba7c9e1b75sm18278545ad.50 - gsmtp
+SMTP Response: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2ba7c9e1b75sm18278545ad.50 - gsmtp
+
+-----------------------------------
+[VERIFICATION] Attempting to send OTP to sujaljathar729@gmail.com...
+Using EMAIL_USER: shinde.ashish1815@gmail.com
+-----------------------------------
+
+CRITICAL ERROR: Failed to send email.
+Error Code: EAUTH
+Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2ba7ca24a62sm19291975ad.75 - gsmtp
+SMTP Response: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2ba7ca24a62sm19291975ad.75 - gsmtp
+
+-----------------------------------
+[VERIFICATION] Attempting to send OTP to sujaljathar729@gmail.com...
+Using EMAIL_USER: shinde.ashish1815@gmail.com
+-----------------------------------
+
+CRITICAL ERROR: Failed to send email.
+Error Code: EAUTH
+Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-365b056921csm1001592a91.1 - gsmtp
+SMTP Response: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-365b056921csm1001592a91.1 - gsmtp
+
+-----------------------------------
+[VERIFICATION] Attempting to send OTP to sujaljathar123@gmail.com...
+Using EMAIL_USER: shinde.ashish1815@gmail.com
+-----------------------------------
+
+CRITICAL ERROR: Failed to send email.
+Error Code: EAUTH
+Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-83965645d74sm4840031b3a.1 - gsmtp
+SMTP Response: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-83965645d74sm4840031b3a.1 - gsmtp
+
+-----------------------------------
+[VERIFICATION] Attempting to send OTP to sujaljathar123@gmail.com...
+Using EMAIL_USER: shinde.ashish1815@gmail.com
+-----------------------------------
+
+CRITICAL ERROR: Failed to send email.
+Error Code: EAUTH
+Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-365b4c4270esm2254006a91.9 - gsmtp
+SMTP Response: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-365b4c4270esm2254006a91.9 - gsmtp

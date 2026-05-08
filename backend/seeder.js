@@ -11,7 +11,7 @@ const Payment = require('./models/paymentModel');
 
 const connectDB = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/gymsaas';
+    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/';
     await mongoose.connect(mongoUri);
     console.log('MongoDB Connected for Seeding...');
   } catch (err) {

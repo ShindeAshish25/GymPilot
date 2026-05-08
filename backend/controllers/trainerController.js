@@ -43,7 +43,7 @@ exports.updateTrainer = async (req, res) => {
 
 exports.deleteTrainer = async (req, res) => {
   try {
-    const trainer = await Trainer.findOneAndRemove({ _id: req.params.id, gymId: req.gym.id });
+    const trainer = await Trainer.findOneAndDelete({ _id: req.params.id, gymId: req.gym.id });
     if (!trainer) return res.status(404).json({ msg: 'Trainer not found or unauthorized' });
     res.json({ msg: 'Trainer removed' });
   } catch (err) {

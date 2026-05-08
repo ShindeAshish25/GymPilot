@@ -10,8 +10,18 @@ const app = express();
 connectDB();
 
 // Init Middleware
-app.use(express.json({ extended: false }));
+app.use(express.json());
 app.use(cors());
+
+// Global Request Logger - MUST BE ABOVE ROUTES
+app.use((req, res, next) => {
+  const time = new Date().toLocaleTimeString();
+  console.log(`\n>>> [${time}] ${req.method} ${req.url}`);
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log('    BODY:', JSON.stringify(req.body, null, 2));
+  }
+  next();
+});
 app.use('/uploads', express.static('uploads'));
 
 app.get('/', (req, res) => res.send('Gym SaaS API Running'));
@@ -30,6 +40,7 @@ app.use('/api/reports', require('./routes/reportRoutes'));
 
 // Error Handler Middleware
 app.use(errorHandler);
+
 
 const PORT = process.env.PORT || 5000;
 

@@ -413,8 +413,8 @@ class _PaymentGatewayScreenState extends State<PaymentGatewayScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Lottie.network(
-                'https://lottie.host/81f9b3b2-6028-406a-8b1b-b72e519c7f66/69mE6J0K1M.json', // Premium Checkmark
+              Lottie.asset(
+                'assets/animations/success.json', // Premium Checkmark
                 width: 150,
                 height: 150,
                 repeat: false,

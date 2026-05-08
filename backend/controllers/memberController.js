@@ -100,7 +100,7 @@ exports.updateMember = async (req, res) => {
 
 exports.deleteMember = async (req, res) => {
   try {
-    const member = await Member.findOneAndRemove({ _id: req.params.id, gymId: req.gym.id });
+    const member = await Member.findOneAndDelete({ _id: req.params.id, gymId: req.gym.id });
 
     if (!member) return res.status(404).json({ msg: 'Member not found or unauthorized' });
 

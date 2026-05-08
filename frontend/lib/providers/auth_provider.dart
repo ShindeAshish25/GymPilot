@@ -199,6 +199,7 @@ class AuthProvider with ChangeNotifier {
   // ── OTP & Password ───────────────────────────────────────────────────────
 
   Future<void> sendOtp(String email) async {
+    //TODO Not handle Success
     await _repository.sendOtp(email);
   }
 

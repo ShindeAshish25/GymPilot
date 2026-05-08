@@ -26,6 +26,7 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
+  // TODO NEed to dispose  the controller
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
@@ -44,6 +45,7 @@ class _SignupScreenState extends State<SignupScreen> {
     if (image != null) {
       final bytes = await image.readAsBytes();
       setState(() {
+        //TODO We cannot upload bytes to backend as its not good practice we need to upload the bytes somewhere create image url to save
         _logo = image;
         _logoBytes = bytes;
       });
@@ -52,12 +54,16 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Future<void> _sendOtp() async {
     if (_emailController.text.isEmpty || !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(_emailController.text)) {
+
+      //TODO Create common ScaffoldMessenger extension easy to use
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid email')));
       return;
     }
 
     setState(() => _isSendingOtp = true);
     try {
+
+      //TODO _isOtpSent is unwanted variable we can check it on sendOTP api response and handle it.
       await context.read<AuthProvider>().sendOtp(_emailController.text);
       setState(() => _isOtpSent = true);
       if (mounted) {
@@ -78,6 +84,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> _verifyOtp() async {
+    //TODO Extra validation we already have form key validation and _isVerifyingOtp isn't required unwanted taking space
     if (_otpController.text.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter 6-digit OTP')));
       return;
@@ -109,6 +116,7 @@ class _SignupScreenState extends State<SignupScreen> {
         );
         return;
       }
+      //TODO Email will be validate as becz we are already verfitying the email for OTP
       if (!_isEmailVerified) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please verify your email via OTP first')),
@@ -127,7 +135,8 @@ class _SignupScreenState extends State<SignupScreen> {
         'address': 'Not specified',
       };
 
-      // Navigate to Payment Gateway FIRST - The registration call happens AFTER payment success
+      //TODO Plan and payment navigation should be taken after registration, becz plan can be changed each year so we cant make it hard coded, need to get this information from Plan Master.
+      // TODO Navigate to Payment Gateway FIRST - The registration call happens AFTER payment success
       context.push('/payment-gateway', extra: {
         'fields': fields,
         'logoBytes': _logoBytes,
@@ -142,10 +151,13 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    //TODO Change the background color
+    //TODO isLoading isn't required not much usable and unwanted.
     final isLoading = context.watch<AuthProvider>().isLoading;
 
     return Scaffold(
       backgroundColor: Colors.white,
+      //TODO Create a common AppBar widget
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -170,265 +182,263 @@ class _SignupScreenState extends State<SignupScreen> {
             ],
           ),
         ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Logo Upload Section
-                  Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      Container(
-                        width: 140,
-                        height: 140,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                          border: Border.all(color: Colors.white, width: 4),
-                        ),
-                        child: ClipOval(
-                          child: _logoBytes != null 
-                            ? Image.memory(_logoBytes!, fit: BoxFit.cover)
-                            : Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.fitness_center, size: 40, color: AppColors.textMuted.withValues(alpha: 0.5)),
-                                  const SizedBox(height: 4),
-                                  const Text('GYM LOGO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
-                                ],
-                              ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: isLoading ? null : _pickImage,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Logo Upload Section
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    Container(
+                      width: 140,
+                      height: 140,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
                           ),
-                          child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
-                        ),
-                      ),
-                    ],
-                  ).animate().scale(duration: 500.ms),
-                  
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Join the Network',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.darkSurface,
-                      letterSpacing: -1,
-                    ),
-                  ).animate().fadeIn(delay: 200.ms),
-                  const Text(
-                    'Grow your fitness business today',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                  ).animate().fadeIn(delay: 300.ms),
-                  
-                  const SizedBox(height: 40),
-                  
-                  // Form Fields in a Card
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(32),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 30,
-                          offset: const Offset(0, 15),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildLabel('Owner\'s Full Name'),
-                        _buildRoundedTextField(_fullNameController, 'John Doe', Icons.person_outline_rounded),
-                        
-                        const SizedBox(height: 20),
-                        _buildLabel('Gym Name'),
-                        _buildRoundedTextField(_gymNameController, 'Elite Fitness Center', Icons.storefront_rounded),
-                        
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _buildLabel('Email Address'),
-                            if (!_isEmailVerified)
-                              GestureDetector(
-                                onTap: _isSendingOtp ? null : _sendOtp,
-                                child: Text(
-                                  _isSendingOtp ? 'Sending...' : 'Verify OTP',
-                                  style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
-                                ),
-                              ),
-                          ],
-                        ),
-                        _buildRoundedTextField(
-                          _emailController, 
-                          'owner@gymname.com', 
-                          Icons.mail_outline_rounded,
-                          readOnly: _isEmailVerified,
-                          suffixIcon: _isEmailVerified ? const Icon(Icons.check_circle, color: Colors.green, size: 20) : null,
-                        ),
-
-                        if (_isOtpSent && !_isEmailVerified) ...[
-                          const SizedBox(height: 20),
-                          _buildLabel('Enter 6-Digit OTP'),
-                          _buildRoundedTextField(
-                            _otpController, 
-                            'Enter OTP from terminal/email', 
-                            Icons.lock_open_rounded,
-                            keyboardType: TextInputType.number,
-                            suffixIcon: _isVerifyingOtp 
-                              ? const Padding(
-                                  padding: EdgeInsets.all(12.0),
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : IconButton(
-                                  icon: const Icon(Icons.verified_user_rounded, color: AppColors.primary),
-                                  onPressed: _verifyOtp,
-                                ),
-                          ).animate().fadeIn().shake(),
                         ],
-
-                        const SizedBox(height: 20),
-                        _buildLabel('Mobile Number'),
-                        _buildRoundedTextField(_mobileController, '+1 (555) 000-0000', Icons.phone_android_rounded, keyboardType: TextInputType.phone),
-                        
-                        const SizedBox(height: 20),
-                        _buildLabel('Password'),
-                        _buildRoundedTextField(
-                          _passwordController, 
-                          '••••••••', 
-                          Icons.lock_outline_rounded, 
-                          isPassword: true,
-                          obscureText: _obscurePassword,
-                          onToggleVisibility: () => setState(() => _obscurePassword = !_obscurePassword),
-                        ),
-                        
-                        const SizedBox(height: 20),
-                        _buildLabel('Confirm Password'),
-                        _buildRoundedTextField(
-                          _confirmPasswordController, 
-                          '••••••••', 
-                          Icons.lock_outline_rounded, 
-                          isPassword: true,
-                          obscureText: _obscureConfirmPassword,
-                          onToggleVisibility: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
-                        ),
-
-                        const SizedBox(height: 24),
-                        _buildLabel('Choose Your Plan'),
-                        const SizedBox(height: 12),
-                        
-                        // Plan Selection Cards
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              _buildPlanCard(
-                                title: 'Free Trial',
-                                duration: '1 Month',
-                                price: '₹0',
-                                description: '₹2.00 setup fee',
-                                isTrial: true,
-                              ),
-                              const SizedBox(width: 12),
-                              _buildPlanCard(
-                                title: 'Quarterly',
-                                duration: '3 Months',
-                                price: '₹3,999',
-                                description: 'Save 15%',
-                                planValue: '3',
-                              ),
-                              const SizedBox(width: 12),
-                              _buildPlanCard(
-                                title: 'Annual',
-                                duration: '12 Months',
-                                price: '₹14,999',
-                                description: 'Best Value (40% OFF)',
-                                planValue: '12',
-                                isBestValue: true,
-                              ),
-                            ],
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 32),
-                        isLoading 
-                          ? const Center(child: CircularProgressIndicator())
-                          : GradientButton(
-                              text: 'Signup Now',
-                              onPressed: _isEmailVerified ? _submit : null,
+                        border: Border.all(color: Colors.white, width: 4),
+                      ),
+                      child: ClipOval(
+                        child: _logoBytes != null
+                          ? Image.memory(_logoBytes!, fit: BoxFit.cover)
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.fitness_center, size: 40, color: AppColors.textMuted.withValues(alpha: 0.5)),
+                                const SizedBox(height: 4),
+                                const Text('GYM LOGO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
+                              ],
                             ),
-                        
-                        const SizedBox(height: 20),
-                        Center(
-                          child: Wrap(
-                            alignment: WrapAlignment.center,
-                            children: [
-                              const Text('By signing up, you agree to our ', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                              const Text('Terms of Service', style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.bold)),
-                              const Text(' and ', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                              const Text('Privacy Policy', style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),
-                  
-                  const SizedBox(height: 32),
-                  Center(
-                    child: TextButton(
-                      onPressed: isLoading ? null : () => Navigator.pop(context),
-                      child: RichText(
-                        text: const TextSpan(
-                          text: 'Already have a partner account? ',
-                          style: TextStyle(color: AppColors.textSecondary),
+                    GestureDetector(
+                      onTap: isLoading ? null : _pickImage,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                      ),
+                    ),
+                  ],
+                ).animate().scale(duration: 500.ms),
+
+                const SizedBox(height: 24),
+                const Text(
+                  'Join the Network',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.darkSurface,
+                    letterSpacing: -1,
+                  ),
+                ).animate().fadeIn(delay: 200.ms),
+                const Text(
+                  'Grow your fitness business today',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                ).animate().fadeIn(delay: 300.ms),
+
+                const SizedBox(height: 40),
+
+                // Form Fields in a Card
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(32),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 30,
+                        offset: const Offset(0, 15),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildLabel('Owner\'s Full Name'),
+                      _buildRoundedTextField(_fullNameController, 'John Doe', Icons.person_outline_rounded),
+
+                      const SizedBox(height: 20),
+                      _buildLabel('Gym Name'),
+                      _buildRoundedTextField(_gymNameController, 'Elite Fitness Center', Icons.storefront_rounded),
+
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildLabel('Email Address'),
+                          if (!_isEmailVerified)
+                            GestureDetector(
+                              onTap: _isSendingOtp ? null : _sendOtp,
+                              child: Text(
+                                _isSendingOtp ? 'Sending...' : 'Verify OTP',
+                                style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
+                            ),
+                        ],
+                      ),
+                      _buildRoundedTextField(
+                        _emailController,
+                        'owner@gymname.com',
+                        Icons.mail_outline_rounded,
+                        readOnly: _isEmailVerified,
+                        suffixIcon: _isEmailVerified ? const Icon(Icons.check_circle, color: Colors.green, size: 20) : null,
+                      ),
+
+                      if (_isOtpSent && !_isEmailVerified) ...[
+                        const SizedBox(height: 20),
+                        _buildLabel('Enter 6-Digit OTP'),
+                        _buildRoundedTextField(
+                          _otpController,
+                          'Enter OTP from terminal/email',
+                          Icons.lock_open_rounded,
+                          keyboardType: TextInputType.number,
+                          suffixIcon: _isVerifyingOtp
+                            ? const Padding(
+                                padding: EdgeInsets.all(12.0),
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : IconButton(
+                                icon: const Icon(Icons.verified_user_rounded, color: AppColors.primary),
+                                onPressed: _verifyOtp,
+                              ),
+                        ).animate().fadeIn().shake(),
+                      ],
+
+                      const SizedBox(height: 20),
+                      _buildLabel('Mobile Number'),
+                      _buildRoundedTextField(_mobileController, '+1 (555) 000-0000', Icons.phone_android_rounded, keyboardType: TextInputType.phone),
+
+                      const SizedBox(height: 20),
+                      _buildLabel('Password'),
+                      _buildRoundedTextField(
+                        _passwordController,
+                        '••••••••',
+                        Icons.lock_outline_rounded,
+                        isPassword: true,
+                        obscureText: _obscurePassword,
+                        onToggleVisibility: () => setState(() => _obscurePassword = !_obscurePassword),
+                      ),
+
+                      const SizedBox(height: 20),
+                      _buildLabel('Confirm Password'),
+                      _buildRoundedTextField(
+                        _confirmPasswordController,
+                        '••••••••',
+                        Icons.lock_outline_rounded,
+                        isPassword: true,
+                        obscureText: _obscureConfirmPassword,
+                        onToggleVisibility: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                      ),
+
+                      const SizedBox(height: 24),
+                      _buildLabel('Choose Your Plan'),
+                      const SizedBox(height: 12),
+
+                      // Plan Selection Cards
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
                           children: [
-                            TextSpan(
-                              text: 'Log In',
-                              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                            _buildPlanCard(
+                              title: 'Free Trial',
+                              duration: '1 Month',
+                              price: '₹0',
+                              description: '₹2.00 setup fee',
+                              isTrial: true,
+                            ),
+                            const SizedBox(width: 12),
+                            _buildPlanCard(
+                              title: 'Quarterly',
+                              duration: '3 Months',
+                              price: '₹3,999',
+                              description: 'Save 15%',
+                              planValue: '3',
+                            ),
+                            const SizedBox(width: 12),
+                            _buildPlanCard(
+                              title: 'Annual',
+                              duration: '12 Months',
+                              price: '₹14,999',
+                              description: 'Best Value (40% OFF)',
+                              planValue: '12',
+                              isBestValue: true,
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 20),
-                  // Bottom Nav Placeholder
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildBottomNavItem(Icons.home_filled, 'Home', true),
-                      _buildBottomNavItem(Icons.info_outline, 'About', false),
-                      _buildBottomNavItem(Icons.help_outline, 'Support', false),
+
+                      const SizedBox(height: 32),
+                      isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : GradientButton(
+                            text: 'Signup Now',
+                            onPressed:  _submit ,
+                          ),
+
+                      const SizedBox(height: 20),
+                      Center(
+                        child: Wrap(
+                          alignment: WrapAlignment.center,
+                          children: [
+                            const Text('By signing up, you agree to our ', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                            const Text('Terms of Service', style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.bold)),
+                            const Text(' and ', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                            const Text('Privacy Policy', style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                ],
-              ),
+                ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),
+
+                const SizedBox(height: 32),
+                Center(
+                  child: TextButton(
+                    onPressed: isLoading ? null : () => Navigator.pop(context),
+                    child: RichText(
+                      text: const TextSpan(
+                          text: 'Already have a partner account? ',
+                        style: TextStyle(color: AppColors.textSecondary),
+                        children: [
+                          TextSpan(
+                            text: 'Log In',
+                            style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+                // Bottom Nav Placeholder
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildBottomNavItem(Icons.home_filled, 'Home', true),
+                    _buildBottomNavItem(Icons.info_outline, 'About', false),
+                    _buildBottomNavItem(Icons.help_outline, 'Support', false),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

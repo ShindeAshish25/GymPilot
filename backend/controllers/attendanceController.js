@@ -1,4 +1,5 @@
 const Attendance = require('../models/attendanceModel');
+const Member = require('../models/memberModel');
 
 exports.checkIn = async (req, res) => {
   const { memberId, checkInDate, checkInTime } = req.body;

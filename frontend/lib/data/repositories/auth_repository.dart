@@ -22,8 +22,18 @@ class AuthRepository {
     }
   }
 
-  Future<Map<String, dynamic>> registerGym(Map<String, String> fields, Uint8List bytes, String fileName) async {
-    final response = await _apiService.postMultipart('/auth/register-gym', fields, bytes, fileName, 'gymLogo');
+  Future<Map<String, dynamic>> registerGym(
+    Map<String, String> fields,
+    Uint8List bytes,
+    String fileName,
+  ) async {
+    final response = await _apiService.postMultipart(
+      '/auth/register-gym',
+      fields,
+      bytes,
+      fileName,
+      'gymLogo',
+    );
 
     if (response.statusCode == 200) {
       return json.decode(response.body);
@@ -34,6 +44,7 @@ class AuthRepository {
   }
 
   Future<void> sendOtp(String email) async {
+    //TODO Not handle Success
     final response = await _apiService.post('/auth/send-otp', {'email': email});
     if (response.statusCode != 200) {
       final error = json.decode(response.body);
@@ -42,7 +53,10 @@ class AuthRepository {
   }
 
   Future<bool> verifyOtp(String email, String otp) async {
-    final response = await _apiService.post('/auth/verify-otp', {'email': email, 'otp': otp});
+    final response = await _apiService.post('/auth/verify-otp', {
+      'email': email,
+      'otp': otp,
+    });
     if (response.statusCode == 200) {
       return true;
     } else {
@@ -51,7 +65,11 @@ class AuthRepository {
     }
   }
 
-  Future<void> resetPassword(String email, String otp, String newPassword) async {
+  Future<void> resetPassword(
+    String email,
+    String otp,
+    String newPassword,
+  ) async {
     final response = await _apiService.post('/auth/reset-password', {
       'email': email,
       'otp': otp,
@@ -59,7 +77,9 @@ class AuthRepository {
     });
     if (response.statusCode != 200) {
       final error = json.decode(response.body);
-      throw ServerException(error['msg'] ?? error['message'] ?? 'Failed to reset password');
+      throw ServerException(
+        error['msg'] ?? error['message'] ?? 'Failed to reset password',
+      );
     }
   }
 
@@ -83,10 +103,22 @@ class AuthRepository {
     }
   }
 
-  Future<Map<String, dynamic>> updateGymInfo(String? gymName, Uint8List? logoBytes, String? fileName) async {
+  Future<Map<String, dynamic>> updateGymInfo(
+    String? gymName,
+    Uint8List? logoBytes,
+    String? fileName,
+  ) async {
     if (logoBytes != null && fileName != null) {
-      final fields = gymName != null ? {'gymName': gymName} : <String, String>{};
-      final response = await _apiService.putMultipart('/gym/info', fields, logoBytes, fileName, 'logo');
+      final fields = gymName != null
+          ? {'gymName': gymName}
+          : <String, String>{};
+      final response = await _apiService.putMultipart(
+        '/gym/info',
+        fields,
+        logoBytes,
+        fileName,
+        'logo',
+      );
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
@@ -105,7 +137,9 @@ class AuthRepository {
   }
 
   Future<Map<String, dynamic>> updateMembership(int months) async {
-    final response = await _apiService.put('/gym/membership', {'months': months});
+    final response = await _apiService.put('/gym/membership', {
+      'months': months,
+    });
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {

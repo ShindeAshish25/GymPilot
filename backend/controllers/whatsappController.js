@@ -5,7 +5,7 @@ exports.sendOverdueReminder = async (req, res) => {
   try {
     const { memberId } = req.body;
     
-    const member = await Member.findOne({ memberId, gymId: req.gym.id });
+    const member = await Member.findOne({ _id: memberId, gymId: req.gym.id });
     
     if (!member) {
       return res.status(404).json({ message: 'Member not found' });
