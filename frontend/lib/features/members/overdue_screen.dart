@@ -25,11 +25,11 @@ class _OverdueScreenState extends State<OverdueScreen> {
   }
 
   void _showMemberForm({MemberModel? member}) async {
-    final result = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => MemberFormScreen(member: member),
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MemberFormScreen(member: member),
+      ),
     );
     if (result == true && mounted) {
       Provider.of<MemberProvider>(context, listen: false).fetchMembers();

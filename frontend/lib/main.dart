@@ -10,6 +10,7 @@ import 'providers/attendance_provider.dart';
 import 'providers/trainer_provider.dart';
 import 'providers/expense_provider.dart';
 import 'providers/report_provider.dart';
+import 'providers/inquiry_provider.dart';
 
 void main() {
   //TODO Web support required need to make responsive
@@ -23,6 +24,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => TrainerProvider()),
         ChangeNotifierProvider(create: (_) => ExpenseProvider()),
         ChangeNotifierProvider(create: (_) => ReportProvider()),
+        ChangeNotifierProvider(create: (_) => InquiryProvider()),
       ],
       child: const GymSaaSApp(),
     ),

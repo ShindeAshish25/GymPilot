@@ -37,6 +37,7 @@ app.use('/api/gym', require('./routes/gymRoutes'));
 app.use('/api/expenses', require('./routes/expenseRoutes'));
 app.use('/api/trainers', require('./routes/trainerRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
+app.use('/api/inquiries', require('./routes/inquiryRoutes'));
 
 // Error Handler Middleware
 app.use(errorHandler);

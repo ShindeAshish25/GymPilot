@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/member_provider.dart';
 import 'widgets/member_card.dart';
-import 'widgets/add_member_modal.dart';
 
 class MemberListScreen extends StatefulWidget {
   const MemberListScreen({super.key});
@@ -23,15 +22,6 @@ class _MemberListScreenState extends State<MemberListScreen> {
     });
   }
 
-  void _showAddMemberModal() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => AddMemberModal(),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,8 +35,6 @@ class _MemberListScreenState extends State<MemberListScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    _buildAddButton(),
-                    const SizedBox(height: 20),
                     _buildSearchBar(),
                     const SizedBox(height: 20),
                     Expanded(child: _buildMemberList()),
@@ -57,7 +45,6 @@ class _MemberListScreenState extends State<MemberListScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(),
     );
   }
 
@@ -109,25 +96,6 @@ class _MemberListScreenState extends State<MemberListScreen> {
             style: TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.2),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildAddButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton.icon(
-        onPressed: _showAddMemberModal,
-        icon: const Icon(Icons.add, size: 24),
-        label: const Text('Add Active Member', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 8,
-          shadowColor: AppColors.primary.withOpacity(0.4),
-        ),
       ),
     );
   }
@@ -224,44 +192,6 @@ class _MemberListScreenState extends State<MemberListScreen> {
           },
         );
       },
-    );
-  }
-
-  Widget _buildBottomNav() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _navItem(Icons.home_outlined, 'HOME', false),
-          _navItem(Icons.badge_outlined, 'MEMBERS', true),
-          // Floating Action Button Style for Members (Optional, design shows a red circle for one item)
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-            child: const Icon(Icons.people, color: Colors.white),
-          ),
-          _navItem(Icons.timer_outlined, 'OVERDUE', false),
-          _navItem(Icons.bar_chart_outlined, 'REPORTS', false),
-        ],
-      ),
-    );
-  }
-
-  Widget _navItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 24, color: isActive ? AppColors.primary : AppColors.textMuted),
-        const SizedBox(height: 4),
-        Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isActive ? AppColors.primary : AppColors.textMuted)),
-      ],
     );
   }
 }

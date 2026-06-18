@@ -1,0 +1,25 @@
+# Instad of "Add New customer" buttom use Floating action button in bottom right side
+# when user Click on button then open that form in popup box.
+# In that form the feild shold be small and attractive. redesign the form constrcut the form like do not show scroll bar
+# Add validation on save mamber details button bellow are mandatory feilds is any missing then show allert message "please fill {feild name}"
+    - Personal tab ( Full Name, Mobile Number, Email, Gender, Address )
+    - Membership tab ( Membership Duration, Start Date, End Date (auto), Payment date, Batch, Training type, want Personal Training ?, Payment (Total fee, Paid amount,         Remaining ) Payment mode, )
+    - Physical tab (Height, weight, )
+
+---------------------------------------------------------------------
+
+    # Floating Action Button (FAB)  show only in "customer page only"
+    # Read the add New customer form code and redesign the form how to show, new style exepept modal and popup
+    # open the form on Floating Action Button (FAB)
+
+-------------------------------------------------------------------
+
+# In customer page add one more tab Inqury 
+# in Inqury tab there is give one Floating action button on top right correnr
+# make sure the add new Inqury button show only Inqury tab
+# on cliking of that button show form (Full Name, Mobile Number, Email, Gender, Inqury Date, plan to join date, Address)
+# in tab showing data give to button like renew name as join membership ones the click then getting information Membership & Physical form details
+
+---------------------------------------------------------------------
+
+#

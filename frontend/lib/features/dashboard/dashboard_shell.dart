@@ -4,7 +4,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/widgets/floating_nav_bar.dart';
 import '../../core/widgets/app_header.dart';
 import '../../core/constants/app_colors.dart';
-
 class DashboardShell extends StatelessWidget {
   final Widget child;
 
